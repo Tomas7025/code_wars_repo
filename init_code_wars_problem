@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# This script will create a new directory and file for a new code wars problem with a given link exemple: https://www.codewars.com/kata/decode-the-morse-code-advanced
+
+# Extract the problem name from the link
+problem_name=$(echo $1 | cut -d '/' -f 6)
+
+echo "Creating a new directory for the problem: $problem_name"
