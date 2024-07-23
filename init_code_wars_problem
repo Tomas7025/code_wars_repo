@@ -96,4 +96,13 @@ else
     fi
 fi
 
+
 echo "Problem setup complete. Check the directory '$problem_name' for the files."
+
+problem_name=$(awk -F'/' '{print $NF}' <<< "$1" | sed 's/_/ /g')
+
+# create an .md with the problem name and link
+echo "# $problem_name" > "$problem_name.md"
+echo "" >> "$problem_name.md"
+echo "Link: $1" >> "$problem_name.md"
+echo "" >> "$problem_name.md"
