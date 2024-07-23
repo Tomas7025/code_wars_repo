@@ -1,8 +1,99 @@
 #!/bin/bash
 
-# This script will create a new directory and file for a new code wars problem with a given link exemple: https://www.codewars.com/kata/decode-the-morse-code-advanced
+# Verifica se o link foi fornecido como argumento
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <URL> [language] [--no-tests]"
+    exit 1
+fi
 
-# Extract the problem name from the link
-problem_name=$(echo $1 | cut -d '/' -f 6)
+# Extrai o nome do problema do link
+problem_name=$(awk -F'/' '{print $NF}' <<< "$1" | sed 's/-/_/g')
 
 echo "Creating a new directory for the problem: $problem_name"
+
+# Cria um diretório para o problema
+mkdir "$problem_name"
+
+cd "$problem_name"
+
+# Definindo os padrões
+language="python"
+create_tests=true
+
+# Verifica se a flag --no-tests foi passada
+if [ "$2" == "--no-tests" ] || [ "$3" == "--no-tests" ]; then
+    create_tests=false
+fi
+
+# Verifica se a linguagem foi especificada
+if [ "$2" != "--no-tests" ] && [ "$2" != "" ]; then
+    language="$2"
+fi
+
+# Se não existir uma especificação da linguagem, usa Python como padrão e cria um arquivo para a solução com o main incluso
+if [ "$language" == "python" ]; then
+    echo "Creating a new file for the solution: $problem_name.py"
+    echo "def main():" > "$problem_name.py"
+    echo "    pass" >> "$problem_name.py"
+    echo "" >> "$problem_name.py"
+    echo "if __name__ == '__main__':" >> "$problem_name.py"
+    echo "    main()" >> "$problem_name.py"
+    
+    if [ "$create_tests" = true ]; then
+        # Cria um arquivo para o teste
+        echo "Creating a new file for the test: test_$problem_name.py"
+        echo "import unittest" > "test_$problem_name.py"
+        echo "from $problem_name import main" >> "test_$problem_name.py"
+        echo "" >> "test_$problem_name.py"
+        echo "class TestSolution(unittest.TestCase):" >> "test_$problem_name.py"
+        echo "    def test_main(self):" >> "test_$problem_name.py"
+        echo "        self.assertEqual(main(), None)" >> "test_$problem_name.py"
+        echo "" >> "test_$problem_name.py"
+        echo "if __name__ == '__main__':" >> "test_$problem_name.py"
+        echo "    unittest.main()" >> "test_$problem_name.py"
+    fi
+else
+    # Faz o setup para a linguagem especificada (c, cpp)
+    if [ "$language" == "c" ]; then
+        echo "Creating a new file for the solution: $problem_name.c"
+        echo "#include <stdio.h>" > "$problem_name.c"
+        echo "" >> "$problem_name.c"
+        echo "int main() {" >> "$problem_name.c"
+        echo "    return 0;" >> "$problem_name.c"
+        echo "}" >> "$problem_name.c"
+        
+        if [ "$create_tests" = true ]; then
+            # Cria um arquivo para o teste com a biblioteca criterion
+            echo "Creating a new file for the test: test_$problem_name.c"
+            echo "#include <criterion/criterion.h>" > "test_$problem_name.c"
+            echo "#include \"$problem_name.c\"" >> "test_$problem_name.c"
+            echo "" >> "test_$problem_name.c"
+            echo "Test($problem_name, main) {" >> "test_$problem_name.c"
+            echo "    cr_assert_eq(main(), 0);" >> "test_$problem_name.c"
+            echo "}" >> "test_$problem_name.c"
+        fi
+
+    elif [ "$language" == "cpp" ]; then
+        echo "Creating a new file for the solution: $problem_name.cpp"
+        echo "#include <iostream>" > "$problem_name.cpp"
+        echo "" >> "$problem_name.cpp"
+        echo "int main() {" >> "$problem_name.cpp"
+        echo "    return 0;" >> "$problem_name.cpp"
+        echo "}" >> "$problem_name.cpp"
+
+        if [ "$create_tests" = true ]; then
+            # Cria um arquivo para o teste com a biblioteca Catch2
+            echo "Creating a new file for the test: test_$problem_name.cpp"
+            echo "#define CATCH_CONFIG_MAIN" > "test_$problem_name.cpp"
+            echo "#include <catch2/catch.hpp>" >> "test_$problem_name.cpp"
+            echo "" >> "test_$problem_name.cpp"
+            echo "TEST_CASE(\"$problem_name\") {" >> "test_$problem_name.cpp"
+            echo "    REQUIRE(main() == 0);" >> "test_$problem_name.cpp"
+            echo "}" >> "test_$problem_name.cpp"
+        fi
+    else
+        echo "Language not supported"
+    fi
+fi
+
+echo "Problem setup complete. Check the directory '$problem_name' for the files."
