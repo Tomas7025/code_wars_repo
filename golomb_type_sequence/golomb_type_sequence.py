@@ -58,7 +58,42 @@ def golomb(input_sequence, output_len):
 						pointer += 1
 						if pointer == output_len:
 							break
-
+		else:
+			result[0] = input_sequence_array[1]
+			result[1] = input_sequence_array[1]
+			pointer = 2
+   
+			for i in range(input_sequence_array[1]):
+				result[pointer] = 0
+				pointer+=1
+				if pointer == output_len:
+							break
+			
+			temp = pointer
+			
+			for i in range(input_sequence_array[1]-2):
+				result[pointer] = input_sequence_array[1]
+				pointer+=1
+				if pointer == output_len:
+							break
+   
+			for term in range(temp, len(input_sequence_array)):
+				if pointer == output_len:
+					break
+				elif result[term] == -1:
+					for i in range(input_sequence_array[term]):
+						result[pointer] = input_sequence_array[term]
+						pointer += 1
+						if pointer == output_len:
+							break
+				else:
+					for i in range(result[term]):
+						result[pointer] = input_sequence_array[term]
+						pointer += 1
+						if pointer == output_len:
+							break
+			
+			
 	return result.tolist()
 
 #main
